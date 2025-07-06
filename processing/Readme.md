@@ -72,52 +72,385 @@ The P2P Cryptocurrency Payment Platform is designed using a modular, layered arc
 - **Data Access Layer:** Manages all interactions with the MySQL database.
 - **Integration Layer:** Connects to external services such as blockchain nodes, payment gateways, and email servers.
 
-### 2.2 Architecture Diagram
+### 2.2 Complete System Architecture
+
+#### 2.2.1 High-Level Architecture Diagram
 
 ```
-+-------------------+      +-------------------+      +-------------------+
-|   Client Side     |      |   Admin Panel     |      |     API Layer     |
-|-------------------|      |-------------------|      |-------------------|
-| • Payment Pages   |      | • Transaction     |      | • REST API        |
-| • Checkout        |      |   Management      |      | • AJAX Handlers   |
-| • QR Codes        |      | • Settings        |      | • Webhooks        |
-+-------------------+      +-------------------+      +-------------------+
-         |                        |                        |
-         +------------------------+------------------------+
-                                  |
-                        +-------------------+
-                        |   Core Engine     |
-                        |-------------------|
-                        | • Business Logic  |
-                        | • Crypto APIs     |
-                        | • Database        |
-                        | • Security        |
-                        +-------------------+
-                                  |
-                        +-------------------+
-                        |   External        |
-                        |   Services        |
-                        |-------------------|
-                        | • Blockchain      |
-                        | • Exchange APIs   |
-                        | • Payment         |
-                        |   Gateways        |
-                        +-------------------+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                    PRESENTATION LAYER                           │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │   Admin Panel   │  │  Payment Pages  │  │   API Gateway   │  │   Webhooks  │ │
+│  │                 │  │                 │  │                 │  │             │ │
+│  │ • Dashboard     │  │ • Checkout      │  │ • REST API      │  │ • Payment   │ │
+│  │ • Transactions  │  │ • QR Codes      │  │ • AJAX Handlers │  │   Notify    │ │
+│  │ • Settings      │  │ • Confirmation  │  │ • Authentication│  │ • Status    │ │
+│  │ • Analytics     │  │ • Status        │  │ • Rate Limiting │  │   Updates   │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                  APPLICATION LAYER                              │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │  Core Business  │  │  Payment        │  │  Security       │  │  Utilities  │ │
+│  │     Logic       │  │  Processing     │  │   Services      │  │             │ │
+│  │                 │  │                 │  │                 │  │             │ │
+│  │ • Transaction   │  │ • Multi-Crypto  │  │ • Authentication│  │ • Email     │ │
+│  │   Management    │  │ • Fiat Gateway  │  │ • Authorization │  │ • PDF Gen   │ │
+│  │ • Customer Mgmt │  │ • Exchange Rate │  │ • Encryption    │  │ • Logging   │ │
+│  │ • Checkout Mgmt │  │ • Confirmation  │  │ • Validation    │  │ • Caching   │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                   INTEGRATION LAYER                             │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │  Blockchain     │  │  Payment        │  │  Exchange Rate  │  │  Email      │ │
+│  │   Services      │  │  Gateways       │  │     APIs        │  │  Services   │ │
+│  │                 │  │                 │  │                 │  │             │ │
+│  │ • Bitcoin API   │  │ • Stripe        │  │ • Coinbase      │  │ • SMTP      │ │
+│  │ • Ethereum API  │  │ • PayPal        │  │ • Gemini        │  │ • PHPMailer│ │
+│  │ • Web3 Provider │  │ • Verifone      │  │ • CoinGecko     │  │ • Templates │ │
+│  │ • Lightning     │  │ • Manual        │  │ • Real-time     │  │ • Queue     │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                    DATA LAYER                                   │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │   MySQL         │  │   File System   │  │   Cache         │  │   Logs      │ │
+│  │   Database      │  │                 │  │                 │  │             │ │
+│  │                 │  │                 │  │                 │  │             │ │
+│  │ • Transactions  │  │ • Uploads       │  │ • Session Data  │  │ • Error     │ │
+│  │ • Checkouts     │  │ • Media         │  │ • API Cache     │  │ • Access    │ │
+│  │ • Settings      │  │ • Templates     │  │ • Rate Limits   │  │ • Security  │ │
+│  │ • Customers     │  │ • Configs       │  │ • Temp Data     │  │ • Audit     │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.3 Component Breakdown
+#### 2.2.2 Detailed Component Architecture
 
-- **admin.php**: Entry point for the admin dashboard, providing access to all management features.
-- **pay.php**: Customer-facing payment page for processing transactions.
-- **api.php**: REST API endpoint for third-party integrations and automation.
-- **ajax.php**: Handles AJAX requests from the frontend for dynamic updates.
-- **functions.php**: Contains all core business logic, including transaction processing, security, and integrations.
-- **bitcoin.php / web3.php**: Blockchain-specific modules for Bitcoin and Ethereum/Token operations.
-- **resources/**: Contains configuration files, language packs, and token lists.
-- **js/**: Client-side JavaScript for both admin and client UIs.
-- **css/**: SCSS/CSS files for styling and responsive design.
-- **media/**: Icons, flags, and other static assets.
-- **vendor/**: Third-party libraries for blockchain, email, PDF, etc.
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              COMPONENT INTERACTIONS                             │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐      │
+│  │   Client    │    │   Admin     │    │   API       │    │  External   │      │
+│  │  Browser    │    │  Interface  │    │  Gateway    │    │  Services   │      │
+│  └─────┬───────┘    └─────┬───────┘    └─────┬───────┘    └─────┬───────┘      │
+│        │                  │                  │                  │              │
+│        ▼                  ▼                  ▼                  ▼              │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐      │
+│  │  Frontend   │    │  Admin      │    │  API        │    │  Blockchain │      │
+│  │  Controllers│    │  Controllers│    │  Controllers│    │  Nodes      │      │
+│  └─────┬───────┘    └─────┬───────┘    └─────┬───────┘    └─────┬───────┘      │
+│        │                  │                  │                  │              │
+│        └──────────────────┼──────────────────┼──────────────────┘              │
+│                           │                  │                                 │
+│                           ▼                  ▼                                 │
+│                    ┌─────────────────────────────────┐                        │
+│                    │        CORE ENGINE              │                        │
+│                    │                                 │                        │
+│                    │  ┌─────────────┐ ┌─────────────┐│                        │
+│                    │  │ Transaction │ │  Payment    ││                        │
+│                    │  │  Manager    │ │  Processor  ││                        │
+│                    │  └─────────────┘ └─────────────┘│                        │
+│                    │                                 │                        │
+│                    │  ┌─────────────┐ ┌─────────────┐│                        │
+│                    │  │  Security   │ │  Utilities  ││                        │
+│                    │  │  Manager    │ │  Manager    ││                        │
+│                    │  └─────────────┘ └─────────────┘│                        │
+│                    └─────────────────────────────────┘                        │
+│                           │                  │                                 │
+│                           ▼                  ▼                                 │
+│                    ┌─────────────────────────────────┐                        │
+│                    │        DATA ACCESS              │                        │
+│                    │                                 │                        │
+│                    │  ┌─────────────┐ ┌─────────────┐│                        │
+│                    │  │   Database  │ │   File      ││                        │
+│                    │  │   Manager   │ │   Manager   ││                        │
+│                    │  └─────────────┘ └─────────────┘│                        │
+│                    └─────────────────────────────────┘                        │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 2.2.3 Security Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              SECURITY LAYERS                                    │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│  │                           NETWORK SECURITY                                  │ │
+│  │  • SSL/TLS Encryption (HTTPS)                                               │ │
+│  │  • Firewall Protection                                                       │ │
+│  │  • DDoS Protection                                                          │ │
+│  │  • Rate Limiting                                                            │ │
+│  └─────────────────────────────────────────────────────────────────────────────┘ │
+│                                    │                                             │
+│                                    ▼                                             │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│  │                        APPLICATION SECURITY                                 │ │
+│  │  • Input Validation & Sanitization                                          │ │
+│  │  • SQL Injection Prevention                                                 │ │
+│  │  • XSS Protection                                                           │ │
+│  │  • CSRF Protection                                                          │ │
+│  │  • Session Management                                                       │ │
+│  └─────────────────────────────────────────────────────────────────────────────┘ │
+│                                    │                                             │
+│                                    ▼                                             │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│  │                         AUTHENTICATION                                      │ │
+│  │  • JWT Token Management                                                     │ │
+│  │  • Two-Factor Authentication (TOTP)                                        │ │
+│  │  │  • Password Hashing (bcrypt)                                               │ │
+│  │  • IP-based Access Control                                                 │ │
+│  │  • Session Timeout                                                          │ │
+│  └─────────────────────────────────────────────────────────────────────────────┘ │
+│                                    │                                             │
+│                                    ▼                                             │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│  │                         AUTHORIZATION                                       │ │
+│  │  • Role-Based Access Control (RBAC)                                        │ │
+│  │  • API Key Management                                                       │ │
+│  │  • Resource-Level Permissions                                              │ │
+│  │  • Audit Logging                                                            │ │
+│  └─────────────────────────────────────────────────────────────────────────────┘ │
+│                                    │                                             │
+│                                    ▼                                             │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│  │                         DATA PROTECTION                                     │ │
+│  │  • AES-256 Encryption for Sensitive Data                                   │ │
+│  │  • Database Encryption                                                      │ │
+│  │  • Secure Key Management                                                    │ │
+│  │  • Data Backup & Recovery                                                   │ │
+│  └─────────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 2.3 Complete Data Flow Architecture
+
+#### 2.3.1 Payment Processing Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              PAYMENT PROCESSING FLOW                           │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐      │
+│  │   Customer  │    │  Payment    │    │   System    │    │  Blockchain │      │
+│  │   Browser   │    │   Page      │    │  Backend    │    │   Network   │      │
+│  └─────┬───────┘    └─────┬───────┘    └─────┬───────┘    └─────┬───────┘      │
+│        │                  │                  │                  │              │
+│        │ 1. Access        │                  │                  │              │
+│        │ Payment URL      │                  │                  │              │
+│        ├─────────────────►│                  │                  │              │
+│        │                  │                  │                  │              │
+│        │                  │ 2. Load Payment  │                  │              │
+│        │                  │ Configuration    │                  │              │
+│        │                  ├─────────────────►│                  │              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 3. Generate      │              │
+│        │                  │                  │ Payment Address  │              │
+│        │                  │                  ├─────────────────►│              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 4. Return        │              │
+│        │                  │                  │ Address & QR     │              │
+│        │                  │◄─────────────────┤                  │              │
+│        │                  │                  │                  │              │
+│        │ 5. Display       │                  │                  │              │
+│        │ Payment Info     │                  │                  │              │
+│        │◄─────────────────┤                  │                  │              │
+│        │                  │                  │                  │              │
+│        │ 6. Send Payment  │                  │                  │              │
+│        │ to Address       │                  │                  │              │
+│        ├─────────────────────────────────────┼─────────────────►│              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 7. Monitor       │              │
+│        │                  │                  │ Blockchain       │              │
+│        │                  │                  │◄─────────────────┤              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 8. Confirm       │              │
+│        │                  │                  │ Transaction      │              │
+│        │                  │                  │                  │              │
+│        │                  │ 9. Update        │                  │              │
+│        │                  │ Status           │                  │              │
+│        │                  │◄─────────────────┤                  │              │
+│        │                  │                  │                  │              │
+│        │ 10. Show         │                  │                  │              │
+│        │ Confirmation     │                  │                  │              │
+│        │◄─────────────────┤                  │                  │              │
+│        │                  │                  │                  │              │
+│        │ 11. Send         │                  │                  │              │
+│        │ Notifications    │                  │                  │              │
+│        │                  │                  ├─────────────────►│              │
+│        │                  │                  │                  │              │
+└────────┴──────────────────┴──────────────────┴──────────────────┴──────────────┘
+```
+
+#### 2.3.2 Admin Dashboard Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              ADMIN DASHBOARD FLOW                              │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐      │
+│  │   Admin     │    │  Admin      │    │   Core      │    │   Database  │      │
+│  │   Browser   │    │  Interface  │    │  Engine     │    │             │      │
+│  └─────┬───────┘    └─────┬───────┘    └─────┬───────┘    └─────┬───────┘      │
+│        │                  │                  │                  │              │
+│        │ 1. Login         │                  │                  │              │
+│        │ Request          │                  │                  │              │
+│        ├─────────────────►│                  │                  │              │
+│        │                  │                  │                  │              │
+│        │                  │ 2. Authenticate  │                  │              │
+│        │                  │ User             │                  │              │
+│        │                  ├─────────────────►│                  │              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 3. Validate      │              │
+│        │                  │                  │ Credentials      │              │
+│        │                  │                  ├─────────────────►│              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 4. Return        │              │
+│        │                  │                  │ User Data        │              │
+│        │                  │◄─────────────────┤                  │              │
+│        │                  │                  │                  │              │
+│        │ 5. Generate      │                  │                  │              │
+│        │ JWT Token        │                  │                  │              │
+│        │◄─────────────────┤                  │                  │              │
+│        │                  │                  │                  │              │
+│        │ 6. Load          │                  │                  │              │
+│        │ Dashboard        │                  │                  │              │
+│        ├─────────────────►│                  │                  │              │
+│        │                  │                  │                  │              │
+│        │                  │ 7. Fetch         │                  │              │
+│        │                  │ Dashboard Data   │                  │              │
+│        │                  ├─────────────────►│                  │              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 8. Query         │              │
+│        │                  │                  │ Statistics       │              │
+│        │                  │                  ├─────────────────►│              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 9. Return        │              │
+│        │                  │                  │ Analytics        │              │
+│        │                  │◄─────────────────┤                  │              │
+│        │                  │                  │                  │              │
+│        │ 10. Display      │                  │                  │              │
+│        │ Dashboard        │                  │                  │              │
+│        │◄─────────────────┤                  │                  │              │
+│        │                  │                  │                  │              │
+│        │ 11. Real-time    │                  │                  │              │
+│        │ Updates          │                  │                  │              │
+│        │◄─────────────────┼──────────────────┼──────────────────┘              │
+│        │                  │                  │                  │              │
+└────────┴──────────────────┴──────────────────┴──────────────────┴──────────────┘
+```
+
+#### 2.3.3 API Integration Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              API INTEGRATION FLOW                              │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐      │
+│  │  External   │    │   API       │    │   Core      │    │  External   │      │
+│  │  System     │    │  Gateway    │    │  Engine     │    │  Services   │      │
+│  └─────┬───────┘    └─────┬───────┘    └─────┬───────┘    └─────┬───────┘      │
+│        │                  │                  │                  │              │
+│        │ 1. API Request   │                  │                  │              │
+│        │ with Key         │                  │                  │              │
+│        ├─────────────────►│                  │                  │              │
+│        │                  │                  │                  │              │
+│        │                  │ 2. Validate      │                  │              │
+│        │                  │ API Key          │                  │              │
+│        │                  ├─────────────────►│                  │              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 3. Check         │              │
+│        │                  │                  │ Permissions      │              │
+│        │                  │                  ├─────────────────►│              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 4. Process       │              │
+│        │                  │                  │ Request          │              │
+│        │                  │                  ├─────────────────►│              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 5. Execute       │              │
+│        │                  │                  │ Business Logic   │              │
+│        │                  │                  │                  │              │
+│        │                  │                  │ 6. Return        │              │
+│        │                  │                  │ Response         │              │
+│        │                  │◄─────────────────┤                  │              │
+│        │                  │                  │                  │              │
+│        │ 7. API Response  │                  │                  │              │
+│        │ with Data        │                  │                  │              │
+│        │◄─────────────────┤                  │                  │              │
+│        │                  │                  │                  │              │
+│        │ 8. Webhook       │                  │                  │              │
+│        │ Notification     │                  │                  │              │
+│        │                  │                  ├─────────────────►│              │
+│        │                  │                  │                  │              │
+└────────┴──────────────────┴──────────────────┴──────────────────┴──────────────┘
+```
+
+#### 2.3.4 Database Schema Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              DATABASE SCHEMA FLOW                              │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│  │                              CORE TABLES                                   │ │
+│  │                                                                             │ │
+│  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐            │ │
+│  │  │ bxc_transactions│  │ bxc_checkouts   │  │ bxc_settings    │            │ │
+│  │  │                 │  │                 │  │                 │            │ │
+│  │  │ • id (PK)       │  │ • id (PK)       │  │ • id (PK)       │            │ │
+│  │  │ • checkout_id   │  │ • name          │  │ • setting_key   │            │ │
+│  │  │ • amount        │  │ • description   │  │ • setting_value │            │ │
+│  │  │ • currency      │  │ • amount        │  │ • created_at    │            │ │
+│  │  │ • status        │  │ • currency      │  │ • updated_at    │            │ │
+│  │  │ • payment_addr  │  │ • payment_method│  │                 │            │ │
+│  │  │ • tx_hash       │  │ • created_at    │  │                 │            │ │
+│  │  │ • created_at    │  │ • updated_at    │  │                 │            │ │
+│  │  │ • updated_at    │  │                 │  │                 │            │ │
+│  │  └─────────────────┘  └─────────────────┘  └─────────────────┘            │ │
+│  │                                                                             │ │
+│  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐            │ │
+│  │  │ bxc_customers   │  │ bxc_api_keys    │  │ bxc_webhooks    │            │ │
+│  │  │                 │  │                 │  │                 │            │ │
+│  │  │ • id (PK)       │  │ • id (PK)       │  │ • id (PK)       │            │ │
+│  │  │ • email         │  │ • user_id       │  │ • checkout_id   │            │ │
+│  │  │ • name          │  │ • api_key       │  │ • url           │            │ │
+│  │  │ • phone         │  │ • permissions   │  │ • events        │            │ │
+│  │  │ • address       │  │ • created_at    │  │ • secret        │            │ │
+│  │  │ • created_at    │  │ • last_used     │  │ • created_at    │            │ │
+│  │  │ • updated_at    │  │                 │  │ • active        │            │ │
+│  │  └─────────────────┘  └─────────────────┘  └─────────────────┘            │ │
+│  └─────────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│  │                            RELATIONSHIPS                                   │ │
+│  │                                                                             │ │
+│  │  bxc_checkouts (1) ────► (N) bxc_transactions                              │ │
+│  │  bxc_checkouts (1) ────► (N) bxc_webhooks                                  │ │
+│  │  bxc_customers (1) ────► (N) bxc_transactions                              │ │
+│  │  bxc_api_keys (N) ────► (1) bxc_users                                      │ │
+│  │                                                                             │ │
+│  └─────────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ### 2.4 Data Flow
 
