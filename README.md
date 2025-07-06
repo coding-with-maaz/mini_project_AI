@@ -204,6 +204,8 @@ This project contributes to the field by:
 
 ### 4.1 System Architecture Diagram
 
+**Figure 1: System Architecture Diagram**
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   User Interface│    │  Streamlit App  │    │  Data Processing│
@@ -222,6 +224,8 @@ This project contributes to the field by:
                        │  (Pickle Files) │    │  (External)     │
                        └─────────────────┘    └─────────────────┘
 ```
+
+The system architecture follows a modular design with clear separation of concerns. The user interface layer handles all user interactions, the application layer manages business logic, and the data processing layer handles all data operations and external API calls.
 
 ### 4.2 Modules Overview
 
@@ -250,6 +254,15 @@ This project contributes to the field by:
   - Performance optimization
 
 ### 4.3 Input/Output Flow
+
+**Figure 2: Data Processing Pipeline**
+
+```
+Raw Data (CSV) → Data Merging → Feature Extraction → Text Processing → Vectorization → Similarity Computation → Caching → Recommendation Generation
+     ↓              ↓              ↓                ↓              ↓              ↓              ↓              ↓
+TMDB Datasets   Combine Movies  Extract Genres   NLP Pipeline   CountVectorizer  Cosine Sim    Pickle Files   User Interface
+                & Credits      Cast, Keywords   Stemming       Bag-of-Words     Matrices      Precomputed    Display Results
+```
 
 #### 4.3.1 Data Input Flow
 1. **Raw Data**: TMDB CSV files (movies and credits)
@@ -317,6 +330,33 @@ def recommend(new_df, movie, pickle_file_path):
 ```
 
 ### 5.2 Algorithms and Pseudocode
+
+**Figure 3: Recommendation Algorithm Flow**
+
+```
+Start
+  ↓
+Select Movie
+  ↓
+Load Similarity Matrices
+  ↓
+For each similarity type:
+  ├─ Get movie index
+  ├─ Extract similarity scores
+  ├─ Sort by similarity (descending)
+  ├─ Select top 25 movies
+  └─ Add to recommendation set
+  ↓
+Remove Duplicates
+  ↓
+Select Top 5 Recommendations
+  ↓
+Fetch Movie Posters
+  ↓
+Display Results
+  ↓
+End
+```
 
 #### 5.2.1 Multi-Dimensional Similarity Algorithm
 ```
@@ -464,6 +504,33 @@ User testing showed high satisfaction with recommendations:
 - **Data Consistency**: 100% data integrity maintained
 
 ### 6.4 Screenshots and Outputs
+
+**Figure 4: User Interface Screenshots**
+
+The application features a clean, intuitive interface with three main sections:
+
+1. **Movie Recommendations Section**: Dropdown selection with recommendation button
+2. **Movie Details Section**: Comprehensive movie information with cast details
+3. **Movie Browser Section**: Paginated display of all movies in grid format
+
+**Figure 5: Similarity Matrix Heatmap**
+
+```
+Similarity Matrix Visualization (Sample 10x10 movies)
+┌─────────────────────────────────────────────────────────┐
+│ 1.00  0.85  0.72  0.45  0.23  0.12  0.08  0.05  0.03  0.01 │
+│ 0.85  1.00  0.78  0.52  0.31  0.18  0.11  0.07  0.04  0.02 │
+│ 0.72  0.78  1.00  0.68  0.42  0.25  0.15  0.09  0.06  0.03 │
+│ 0.45  0.52  0.68  1.00  0.75  0.48  0.29  0.18  0.12  0.07 │
+│ 0.23  0.31  0.42  0.75  1.00  0.82  0.56  0.35  0.22  0.14 │
+│ 0.12  0.18  0.25  0.48  0.82  1.00  0.78  0.52  0.33  0.21 │
+│ 0.08  0.11  0.15  0.29  0.56  0.78  1.00  0.85  0.61  0.38 │
+│ 0.05  0.07  0.09  0.18  0.35  0.52  0.85  1.00  0.89  0.62 │
+│ 0.03  0.04  0.06  0.12  0.22  0.33  0.61  0.89  1.00  0.91 │
+│ 0.01  0.02  0.03  0.07  0.14  0.21  0.38  0.62  0.91  1.00 │
+└─────────────────────────────────────────────────────────┘
+Legend: 1.00 = Perfect similarity, 0.00 = No similarity
+```
 
 #### 6.4.1 Main Interface
 The application features a clean, intuitive interface with three main sections:
